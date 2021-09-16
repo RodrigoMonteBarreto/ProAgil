@@ -54,6 +54,10 @@ namespace ProAgilWebAPI
             app.UseAuthorization();
 
             app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+            //use esse comando para mostrar algumas imagens dentro da grid,
+            // a api deixa as imagens serem encontradas por meio desse comando
+            app.UseStaticFiles();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
