@@ -1,26 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using ProAgilWebAPI.Data;
-using ProAgilWebAPI.Models;
+using ProAgil.Domain;
+using ProAgil.Repository;
 
 namespace ProAgilWebAPI.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("[controller]")]
     public class EventoController : ControllerBase
     {
+        private readonly IProAgilRepository _repository;
 
-
-        private readonly DataContext _context;
-
-        public EventoController(DataContext context)
+        public EventoController(IProAgilRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         [HttpGet]
@@ -28,23 +23,38 @@ namespace ProAgilWebAPI.Controllers
         {
             try
             {
-                var result = await _context.Eventos.ToListAsync();
-                return Ok(result);
+                var results = await _repository.GetAllEventoAsync(true);
+                return Ok(results);
             }
-            catch (Exception)
+            catch (System.Exception)
             {
 
-                return BadRequest("Erro");
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Banco de dados falhou");
             }
 
         }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        [HttpGet("{EventoId}")]
+        public async Task<IActionResult> Get(int EventoId)
         {
             try
             {
-                var result = await _context.Eventos.FirstOrDefaultAsync(x => x.EventoId == id);
+                var result = await _repository.GetEventoAsyncById(EventoId, true);
+                return Ok(result);
+            }
+            catch (System.Exception)
+            {
+
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Banco de dados falhou");
+            }
+
+        }
+
+        [HttpGet("getByTema/{tema}")]
+        public async Task<IActionResult> Get(string tema)
+        {
+            try
+            {
+                var result = await _repository.GetAllEventoAsyncByTema(tema, true);
                 return Ok(result);
             }
             catch (Exception)
@@ -52,6 +62,80 @@ namespace ProAgilWebAPI.Controllers
 
                 return BadRequest("Erro");
             }
+
         }
+        [HttpPost]
+        public async Task<IActionResult> Post(Evento e)
+        {
+            try
+            {
+                _repository.Add(e);
+
+                if (await _repository.SavechangesAsync())
+                {
+                    return Created($"/api/evento/{e.Id}", e);
+                }
+            }
+            catch (System.Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Banco de dados falhou");
+            }
+
+            return BadRequest();
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Put(int EventoId, Evento model)
+        {
+            try
+            {
+                var evento = await _repository.GetEventoAsyncById(EventoId, false);
+
+                if (evento == null) return NotFound();
+
+                _repository.Update(model);
+
+                if (await _repository.SavechangesAsync())
+                {
+                    return Created($"/api/evento/{model.Id}", model);
+                }
+
+            }
+            catch (Exception)
+            {
+
+                return BadRequest("Erro");
+            }
+
+            return BadRequest();
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int EventoId)
+        {
+            try
+            {
+                var evento = await _repository.GetEventoAsyncById(EventoId, false);
+
+                if (evento == null) return NotFound();
+
+                _repository.Delete(evento);
+
+                if (await _repository.SavechangesAsync())
+                {
+                    return Ok();
+                }
+
+            }
+            catch (Exception)
+            {
+
+                return BadRequest("Erro");
+            }
+
+            return BadRequest();
+        }
+
+
     }
 }
