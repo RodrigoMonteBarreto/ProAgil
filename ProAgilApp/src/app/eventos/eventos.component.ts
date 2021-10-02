@@ -18,10 +18,12 @@ export class EventosComponent implements OnInit {
   eventosFiltrados!: Evento[]  ;
   eventos!: Evento[]  ;
   evento!: Evento ;
+  modoSalvar ='post';
   imagemLargura = 100;
   imagemMargem = 2;
   mostrarImagem = false;
   registerForm!: FormGroup;
+  bodyDeletarEvento = '';
   
   _filtroLista = '';
   
@@ -43,6 +45,21 @@ export class EventosComponent implements OnInit {
     {
       this._filtroLista = value;
       this.eventosFiltrados = this.filtroLista ? this.filtraEvento(this.filtroLista) : this.eventos;
+    }
+    
+    
+    editarEvento(evento: Evento, template: any)
+    {
+      this.modoSalvar = 'put';
+      this.openModal(template);
+      this.evento = evento;
+      this.registerForm.patchValue(evento);
+    }
+    
+    novoEvento(template: any)
+    {
+      this.modoSalvar = 'post'
+      this.openModal(template);
     }
     
     openModal(template: any){
@@ -68,6 +85,25 @@ export class EventosComponent implements OnInit {
         this.mostrarImagem = !this.mostrarImagem;
       }
       
+
+      excluirEvento(evento: Evento, template: any) {
+        this.openModal(template);
+        this.evento = evento;
+        this.bodyDeletarEvento = `Tem certeza que deseja excluir o Evento: ${evento.tema}, Código: ${evento.id}`;
+      }
+
+      confirmeDelete(template: any) {
+        this.eventoService.deleteEvento(this.evento.id).subscribe(
+          () => {
+              template.hide();
+              this.getEventos();
+            }, error => {
+              console.log(error);
+            }
+        );
+      }
+
+
       validation(){
         
         this.registerForm = this.fb.group({
@@ -85,33 +121,47 @@ export class EventosComponent implements OnInit {
       salvarAlteracao(template: any){
         if(this.registerForm.valid)
         {
-          this.evento = Object.assign({}, this.registerForm.value);
-          this.eventoService.PostEvento(this.evento).subscribe(
-            (novoEvento: Evento) => {
-            console.log(novoEvento);
-            template.hide();
-            this.getEventos();
-            }, error =>{
-              console.log(error);
+          if(this.modoSalvar === 'post'){
+            this.evento = Object.assign({}, this.registerForm.value);
+            this.eventoService.PostEvento(this.evento).subscribe(
+              (novoEvento: Evento) => {
+                console.log(novoEvento);
+                template.hide();
+                this.getEventos();
+              }, error =>{
+                console.log(error);
+              }
+              
+              );
+            }
+            else {
+              this.evento = Object.assign({id: this.evento.id}, this.registerForm.value);
+              this.eventoService.PutEvento(this.evento).subscribe(
+                () => {                 
+                  template.hide();
+                  this.getEventos();
+                }, error =>{
+                  console.log(error);
+                }
+                
+                );
+              }
+            }
+          }
+          
+          getEventos()
+          {
+            this.eventoService.getAllEvento().subscribe(
+              (_eventos: Evento[]) => {
+                this.eventos = _eventos
+                this.eventosFiltrados = this.eventos;
+                console.log(_eventos);
+              },
+              error => {
+                console.log(error);
+              }
+              );
             }
             
-          );
-        }
-      }
-      
-      getEventos()
-      {
-        this.eventoService.getAllEvento().subscribe(
-          (_eventos: Evento[]) => {
-            this.eventos = _eventos
-            this.eventosFiltrados = this.eventos;
-            console.log(_eventos);
-          },
-          error => {
-            console.log(error);
           }
-          );
-        }
-        
-      }
-      
+          
