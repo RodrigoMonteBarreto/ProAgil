@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using ProAgil.Repository;
+using ProAgilWebAPI.Helpers;
 
 namespace ProAgilWebAPI
 {
@@ -25,10 +26,14 @@ namespace ProAgilWebAPI
 
             services.AddScoped<IProAgilRepository, ProAgilRepository>();
             services.AddControllers();
+
+           
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ProAgilWebAPI", Version = "v1" });
             });
+
+            services.AddAutoMapper(typeof(AutoMapperProfiles));
             services.AddCors();
         }
 
