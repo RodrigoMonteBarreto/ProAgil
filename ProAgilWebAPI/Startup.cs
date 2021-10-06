@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,16 +25,17 @@ namespace ProAgilWebAPI
         {
             services.AddDbContext<ProAgilContext>(x => x.UseSqlite(Configuration.GetConnectionString("Default")));
 
-            services.AddScoped<IProAgilRepository, ProAgilRepository>();
+
             services.AddControllers();
 
-           
+            services.AddMvc();
+            services.AddAutoMapper(typeof(AutoMapperProfiles));
+            services.AddScoped<IProAgilRepository, ProAgilRepository>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ProAgilWebAPI", Version = "v1" });
             });
 
-            services.AddAutoMapper(typeof(AutoMapperProfiles));
             services.AddCors();
         }
 
@@ -54,6 +56,7 @@ namespace ProAgilWebAPI
             app.UseAuthorization();
 
             app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
 
             //use esse comando para mostrar algumas imagens dentro da grid,
             // a api deixa as imagens serem encontradas por meio desse comando

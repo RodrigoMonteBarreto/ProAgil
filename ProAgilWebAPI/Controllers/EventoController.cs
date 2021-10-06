@@ -15,7 +15,7 @@ namespace ProAgilWebAPI.Controllers
     public class EventoController : ControllerBase
     {
         private readonly IProAgilRepository _repository;
-        public IMapper _mapper;
+        public readonly IMapper _mapper;
 
         public EventoController(IProAgilRepository repository, IMapper mapper)
         {
@@ -77,54 +77,57 @@ namespace ProAgilWebAPI.Controllers
 
         }
         [HttpPost]
-        public async Task<IActionResult> Post(EventoDto e)
+        public async Task<IActionResult> Post(EventoDto model)
         {
             try
             {
-                var evento = _mapper.Map<Evento>(e);
+                var evento = _mapper.Map<Evento>(model);
 
                 _repository.Add(evento);
 
                 if (await _repository.SavechangesAsync())
                 {
-                    return Created($"/api/evento/{e.Id}", e);
+                    return Created($"/api/evento/{model.Id}", _mapper.Map<EventoDto>(evento));
                 }
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Banco de dados falhou");
+                return this.StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Banco Dados Falhou {ex.Message}");
             }
 
             return BadRequest();
         }
 
-        [HttpPut("{Eventoid}")]
-        public async Task<IActionResult> Put(int EventoId, Evento model)
+        [HttpPut("{EventoId}")]
+        public async Task<IActionResult> Put(int EventoId, EventoDto model)
         {
             try
             {
-                var evento = await _repository.GetEventoAsyncById(EventoId, false);
+                var evento = await _repository.GetEventoAsyncById(EventoId, true);
 
                 if (evento == null) return NotFound();
 
-                _repository.Update(model);
+                _mapper.Map(model, evento);
+
+                _repository.Update(evento);
 
                 if (await _repository.SavechangesAsync())
                 {
-                    return Created($"/api/evento/{model.Id}", model);
+                    return Created($"/api/evento/{model.Id}", _mapper.Map<EventoDto>(evento));
                 }
-
             }
-            catch (Exception)
-            {
 
-                return BadRequest("Erro");
+            catch (System.Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Banco Dados Falhou {ex.Message}");
             }
 
             return BadRequest();
         }
 
-        [HttpDelete("{Eventoid}")]
+          [HttpDelete("{EventoId}")]
         public async Task<IActionResult> Delete(int EventoId)
         {
             try
