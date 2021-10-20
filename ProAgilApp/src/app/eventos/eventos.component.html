@@ -1,3 +1,5 @@
+
+<app-titulo [titulo]="titulo"></app-titulo>
 <div class=" d-flex justify-content-between">
   <div class="form-inline mr-auto" >
     <div class="form-group mb-2">
@@ -65,7 +67,7 @@
         <i class="fa fa-edit"></i>
       </button>
       <button class="btn btn-sm btn-danger" tooltip="Excluir" (click)="excluirEvento(evento, confirm)">
-           <i class="fa fa-eraser"></i>
+        <i class="fa fa-eraser"></i>
       </button>
     </div>
     
@@ -125,7 +127,9 @@ role="dialog" aria-labelledby="dialog-sizes-name1">
             <label>Data e Hora</label>
             <input  type="text" class="form-control"
             bsDatepicker
-            [bsConfig]= "{dateInputFormat : 'DD/MM/YYYY hh:mm a'}"  
+            value="{{dataEvento | DateTimeFormatPipe}}"
+           [(ngModel)]= "dataEvento"
+            [bsConfig]= "{dateInputFormat : 'DD/MM/YYYY hh:mm'}"  
             [ngClass]="{'is-invalid':registerForm.get('dataEvento')?.errors && registerForm.get('dataEvento')?.touched}"
             formControlName="dataEvento" placeholder="Insira a Data">
             <div *ngIf="registerForm.get('dataEvento')?.hasError('required') && registerForm.get('dataEvento')?.touched" class="invalid-feedback" >
@@ -199,27 +203,27 @@ role="dialog" aria-labelledby="dialog-sizes-name1">
 
 
 <div bsModal #confirm="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dialog-sizes-name1">
-	<div class="modal-dialog modal-sm">
-  		<div class="modal-content">
-    		<div class="modal-header">
-      			<h4 class="modal-title pull-left">
-        			Deletando Evento
-      			</h4>
-      			<button type="button" class="close pull-right" (click)="confirm.hide()" aria-label="Close">
-        			<span aria-hidden="true">&times;</span>
-      			</button>
-    		</div>
-    		<div class="modal-body">
-      			<p>{{bodyDeletarEvento}}</p>
-    		</div>    
-    		<div class="modal-footer btn-group d-flex">      
-      			<button type="button" class="btn btn-outline-primary" (click)="confirm.hide()">
-        			CANCELAR
-      			</button>
-      			<button type="button" class="btn btn-outline-danger" (click)="confirmeDelete(confirm)">
-          			DELETAR
-        		</button>
-    		</div>
-  		</div>
-	</div>
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">
+          Deletando Evento
+        </h4>
+        <button type="button" class="close pull-right" (click)="confirm.hide()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>{{bodyDeletarEvento}}</p>
+      </div>    
+      <div class="modal-footer btn-group d-flex">      
+        <button type="button" class="btn btn-outline-primary" (click)="confirm.hide()">
+          CANCELAR
+        </button>
+        <button type="button" class="btn btn-outline-danger" (click)="confirmeDelete(confirm)">
+          DELETAR
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
