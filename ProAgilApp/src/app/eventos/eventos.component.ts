@@ -123,6 +123,9 @@ export class EventosComponent implements OnInit {
           
         })
       }
+      onFileChange(event: any){
+        console.log(event);
+      }
       
       salvarAlteracao(template: any){
         if(this.registerForm.valid)
